@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="description" content="Verification success page for Discord community access" />
+  <title>Verification Successful</title>
+  <link rel="icon" href="https://cdn.discordapp.com/attachments/1306307464488157204/1308700734153428992/MRTjBUT.png?ex=67403789&is=673ee609&hm=31c1729ff00772ce8ae4d8b29a9e09411a1f66158f24f93d6ec9488cc8927960&" type="image/png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+  <style>
+    /* Base Styles & Reset */
+    *:not(button) {
+      user-select: none;
+      cursor: default;
+    }
+    
+    button {
+      cursor: pointer;
+    }
+
+    :root {
+      --primary-gradient-start: #6a11cb;
+      --primary-gradient-end: #2575fc;
+      --accent-color: #2a9d8f;
+      --bg-dark: #0d0d0d;
+      --card-bg: rgba(30, 30, 30, 0.95);
+      --text-primary: #e0e0e0;
+      --text-secondary: #a0a0a0;
+      --platform-color: #f2f2f2;
+      --transition-speed: 0.5s;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #1f1f1f, var(--bg-dark));
+      font-family: 'Inter', sans-serif;
+      color: var(--text-primary);
+      line-height: 1.5;
+      overflow-x: hidden;
+      padding: clamp(1rem, 3vw, 2rem);
+      user-select: none;
+    }
+
+    /* Loader Container */
+    .loading-container {
+      background: var(--card-bg);
+      border-radius: clamp(15px, 5vw, 20px);
+      padding: clamp(2rem, 5vw, 3rem);
+      width: min(90%, 450px);
+      box-shadow: 0 15px 25px rgba(0, 0, 0, 0.5);
+      text-align: center;
+      position: relative;
+      backdrop-filter: blur(10px);
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity var(--transition-speed) ease, transform var(--transition-speed) ease;
+    }
+
+    .loading-container.fade-out {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+
+    .loader-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .loader {
+      position: relative;
+      width: 150px;
+      height: 160px;
+      margin-bottom: 1rem;
+    }
+
+    /* Bouncing Dot */
+    .loader::before {
+      content: "";
+      position: absolute;
+      bottom: 30px;
+      left: calc(50% - 20px);
+      height: 40px;
+      width: 40px;
+      border-radius: 50%;
+      background: var(--accent-color);
+      animation: loading-bounce 0.6s ease-in-out infinite alternate;
+      box-shadow: 0 0 25px rgba(42, 157, 143, 0.6);
+    }
+
+    /* Platform Steps Animation */
+    .loader::after {
+      content: "";
+      position: absolute;
+      right: 0;
+      top: 0;
+      height: 9px;
+      width: 50px;
+      border-radius: 4px;
+      box-shadow: 0 5px 0 var(--platform-color),
+                  -40px 55px 0 var(--platform-color),
+                  -80px 100px 0 var(--platform-color);
+      animation: loading-step 1s ease-in-out infinite;
+    }
+
+    .loading-text {
+      color: var(--text-secondary);
+      font-size: clamp(1.2rem, 2.5vw, 1.5rem);
+      animation: pulse 1.5s infinite ease-in-out;
+    }
+
+    @keyframes loading-bounce {
+      0% {
+        transform: scale(1, 0.7);
+      }
+      40% {
+        transform: scale(0.8, 1.2);
+      }
+      60% {
+        transform: scale(1, 1);
+      }
+      100% {
+        bottom: 160px;
+      }
+    }
+
+    @keyframes loading-step {
+      0% {
+        box-shadow: 0 10px 0 rgba(0, 0, 0, 0),
+                    0 10px 0 var(--platform-color),
+                    -40px 55px 0 var(--platform-color),
+                    -80px 100px 0 rgba(0, 0, 0, 0);
+      }
+      100% {
+        box-shadow: 0 10px 0 var(--platform-color),
+                    -40px 55px 0 var(--platform-color),
+                    -80px 100px 0 rgba(0, 0, 0, 0);
+      }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 1; }
+    }
+
+    /* Success / Verification Container */
+    .verification-container {
+      display: none;
+      background: var(--card-bg);
+      border-radius: clamp(15px, 5vw, 20px);
+      padding: clamp(2rem, 5vw, 3rem);
+      width: min(90%, 450px);
+      box-shadow: 0 15px 25px rgba(0, 0, 0, 0.5);
+      text-align: center;
+      transform: scale(0.8) translateY(20px);
+      opacity: 0;
+      transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .verification-container.show {
+      display: block;
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+
+    .success-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: clamp(80px, 15vw, 100px);
+      height: clamp(80px, 15vw, 100px);
+      margin: 0 auto 1.5rem;
+      border-radius: 50%;
+      background: linear-gradient(45deg, var(--primary-gradient-start), var(--primary-gradient-end));
+      color: white;
+      font-size: clamp(3rem, 6vw, 4rem);
+      box-shadow: 0 10px 20px rgba(106, 17, 203, 0.4);
+      animation: popIn 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+      position: relative;
+    }
+
+    .success-icon .material-icons {
+      font-size: inherit;
+    }
+
+    @keyframes popIn {
+      0% {
+        transform: scale(0) rotate(-90deg);
+        opacity: 0;
+      }
+      60% {
+        transform: scale(1.2) rotate(10deg);
+        opacity: 0.8;
+      }
+      100% {
+        transform: scale(1) rotate(0);
+        opacity: 1;
+      }
+    }
+
+    /* Redirect Popup */
+    .redirect-popup {
+      display: none;
+      position: fixed;
+      z-index: 9999;
+      bottom: 10%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.95);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 8px;
+      opacity: 0;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      font-size: 16px;
+      backdrop-filter: blur(5px);
+      transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+    }
+
+    .redirect-popup.show {
+      display: block;
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .redirect-popup button {
+      margin-left: 8px;
+      background: var(--accent-color);
+      border: none;
+      color: #fff;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .redirect-popup button:hover {
+      background: #21867a;
+    }
+  </style>
+</head>
+<body>
+  <!-- Loader -->
+  <div class="loading-container" id="loadingContainer">
+    <div class="loader-wrapper">
+      <div class="loader"></div>
+      <p class="loading-text">Finalizing ...</p>
+    </div>
+  </div>
+
+  <!-- Verification Success Content -->
+  <main class="verification-container" id="successContainer">
+    <div class="success-icon" role="img" aria-label="Success checkmark">
+      <span class="material-icons">check</span>
+    </div>
+    <div class="content-wrapper">
+      <h1>Verification Complete!</h1>
+      <p>Congratulations! You've been successfully verified and granted access. 🎉</p>
+    </div>
+  </main>
+
+  <!-- Redirect Popup -->
+  <div class="redirect-popup" id="redirectPopup">
+    Redirecting back to Discord in <span id="redirectTimer">5</span> seconds...
+    <button onclick="redirectNow()">Redirect Now</button>
+  </div>
+
+  <script>
+    function celebrateSuccess() {
+      const count = 250;
+      const defaults = {
+        origin: { y: 0.7 },
+        colors: ['#6a11cb', '#2575fc', '#ffffff']
+      };
+
+      function fire(particleRatio, opts) {
+        confetti({
+          ...defaults,
+          ...opts,
+          particleCount: Math.floor(count * particleRatio)
+        });
+      }
+
+      fire(0.25, { spread: 26, startVelocity: 55 });
+      fire(0.2, { spread: 60 });
+      fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8 });
+      fire(0.1, { spread: 120, startVelocity: 25, decay: 0.92, scalar: 1.2 });
+      fire(0.1, { spread: 120, startVelocity: 45 });
+    }
+
+    function transitionToSuccess() {
+      const loadingContainer = document.getElementById('loadingContainer');
+      const successContainer = document.getElementById('successContainer');
+      const redirectPopup = document.getElementById('redirectPopup');
+
+      // Fade out loader
+      loadingContainer.classList.add('fade-out');
+
+      setTimeout(() => {
+        loadingContainer.style.display = 'none';
+        successContainer.style.display = 'block';
+        // Force a reflow for transition
+        successContainer.offsetHeight;
+        successContainer.classList.add('show');
+        setTimeout(celebrateSuccess, 200);
+        setTimeout(() => {
+          redirectPopup.classList.add('show');
+          startRedirectTimer();
+        }, 1500);
+      }, 500);
+    }
+
+    function startRedirectTimer() {
+      const timerElement = document.getElementById('redirectTimer');
+      let timeLeft = 5;
+      const timer = setInterval(() => {
+        timeLeft--;
+        timerElement.textContent = timeLeft;
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          redirectNow();
+        }
+      }, 1000);
+    }
+
+    function redirectNow() {
+      window.location.href = 'https://discord.com/channels/@me/';
+    }
+
+    setTimeout(transitionToSuccess, 2000);
+  </script>
+
+  <!-- Security: Prevent right-click, text selection, & dev tool shortcuts -->
+  <script>
+    document.addEventListener('contextmenu', event => event.preventDefault());
+    document.addEventListener('selectstart', event => event.preventDefault());
+    document.addEventListener('keydown', event => {
+      if ((event.ctrlKey && ['u', 's', 'c', 'a'].includes(event.key.toLowerCase())) ||
+          (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === 'i') ||
+          event.key === 'F12') {
+        event.preventDefault();
+        return false;
+      }
+    });
+  </script>
+</body>
+</html>

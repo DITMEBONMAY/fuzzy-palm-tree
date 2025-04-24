@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="Secure Discord Authorization Page">
+  <meta name="referrer" content="no-referrer">
+  <meta name="theme-color" content="#0d0d0d">
+  <title>Authorize with Discord</title>
+  <link rel="icon" href="https://i.ibb.co/tm55Xpr/de8404fe4e084fecb317adf4b767c4e7-free.png" type="image/png">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    /* Base Styles & Reset */
+    *:not(button) {
+      user-select: none;
+      cursor: default;
+    }
+    button {
+      cursor: pointer;
+    }
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    html {
+      font-size: 16px;
+      height: 100%;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      margin: 0;
+      background: linear-gradient(135deg, var(--secondary-gradient), #0d0d0d);
+      font-family: 'Roboto', sans-serif;
+      color: var(--text-color);
+      text-align: center;
+      overflow-x: hidden;
+      padding: 1rem;
+    }
+    :root {
+      --primary-gradient-start: #6a11cb;
+      --primary-gradient-end: #2575fc;
+      --secondary-gradient: #1f1f1f;
+      --text-color: #e0e0e0;
+      --text-secondary: #a0a0a0;
+      --button-hover: rgba(255, 255, 255, 0.1);
+      --button-active: #0d0d0d;
+      --shadow-color: rgba(0, 0, 0, 0.4);
+      --highlight-color: #ff5733;
+      --glow-color: rgba(255, 255, 255, 0.8);
+    }
+    
+    main {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .authorization-container {
+      background: rgba(30, 30, 30, 0.9);
+      border-radius: clamp(15px, 5vw, 20px);
+      padding: clamp(1.5rem, 5vw, 2rem);
+      box-shadow: 0 15px 25px rgba(0, 0, 0, 0.5);
+      width: min(90%, 500px);
+      max-width: 450px;
+      text-align: center;
+      animation: fadeInSlide 0.5s ease-out;
+      transform: perspective(1000px) rotateX(5deg);
+      transition: transform 0.6s ease, box-shadow 0.6s ease;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    
+    @supports not (backdrop-filter: blur(10px)) {
+      .authorization-container {
+        background: rgba(30, 30, 30, 0.95);
+      }
+    }
+    
+    .authorization-container:hover {
+      transform: rotateX(0deg) scale(1.02);
+      box-shadow: 0 0 25px 5px var(--glow-color);
+    }
+    
+    @keyframes fadeInSlide {
+      0% {
+        opacity: 0;
+        transform: translateY(30px) perspective(1000px) rotateX(20deg);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) perspective(1000px) rotateX(10deg);
+      }
+    }
+    
+    h1 {
+      color: var(--primary-gradient-start);
+      font-size: clamp(1.5rem, 5vw, 1.8rem);
+      margin-bottom: clamp(0.8rem, 3vw, 1rem);
+      font-weight: 600;
+      line-height: 1.2;
+    }
+    
+    p {
+      color: var(--text-secondary);
+      font-size: clamp(0.9rem, 3vw, 1rem);
+      margin-bottom: clamp(1.2rem, 4vw, 1.5rem);
+      line-height: 1.6;
+    }
+    
+    /* Glowing Button */
+    .btn {
+      display: inline-block;
+      padding: clamp(0.6rem, 2vw, 0.75rem) clamp(1.2rem, 4vw, 1.5rem);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 30px;
+      background: transparent;
+      color: white;
+      font-weight: bold;
+      font-size: clamp(0.8rem, 2.5vw, 1rem);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      text-decoration: none;
+      box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.2);
+    }
+    
+    .btn::before {
+      content: "";
+      background: linear-gradient(
+        45deg,
+        #FF0000, #FF7300, #FFFB00, #48FF00,
+        #00FFD5, #002BFF, #FF00C8, #FF0000
+      );
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      background-size: 600%;
+      z-index: -1;
+      width: calc(100% + 4px);
+      height: calc(100% + 4px);
+      filter: blur(8px);
+      animation: glowing 15s linear infinite;
+      transition: opacity .3s ease-in-out;
+      border-radius: 10px;
+      opacity: 0;
+    }
+    
+    @keyframes glowing {
+      0% { background-position: 0 0; }
+      50% { background-position: 400% 0; }
+      100% { background-position: 0 0; }
+    }
+    
+    .btn:hover::before {
+      opacity: 1;
+    }
+    
+    .btn:hover {
+      transform: translateY(-3px);
+      background-color: var(--highlight-color);
+      color: #fff;
+      box-shadow: 0 0 20px 3px var(--highlight-color);
+    }
+    
+    .btn:active {
+      transform: scale(0.98);
+      box-shadow: 0 0 10px 2px var(--highlight-color);
+      background-color: var(--highlight-color);
+      color: #fff;
+    }
+    
+    @media (hover: hover) {
+      .btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 0 20px 5px var(--highlight-color);
+      }
+    }
+    
+    .discord-logo {
+      width: clamp(80px, 20vw, 100px);
+      height: clamp(80px, 20vw, 100px);
+      margin: 0 auto clamp(0.8rem, 3vw, 1rem);
+      border-radius: 50%;
+      background-color: transparent;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    
+    .discord-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    
+    .security-badge {
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+    
+    footer {
+      text-align: center;
+      padding: 0.5rem;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+    
+    /* Landscape orientation optimizations */
+    @media (max-height: 600px) and (orientation: landscape) {
+      body {
+        padding: 0.5rem;
+      }
+      .authorization-container {
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+      }
+      .discord-logo {
+        width: clamp(60px, 15vw, 80px);
+        height: clamp(60px, 15vw, 80px);
+        margin: 0 1rem 0 0;
+      }
+      .content-wrapper {
+        text-align: left;
+        flex-grow: 1;
+      }
+      h1 {
+        margin-bottom: 0.5rem;
+      }
+      p {
+        margin-bottom: 0.8rem;
+      }
+    }
+    
+    /* High DPI screen optimizations */
+    @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+      .authorization-container {
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+      }
+    }
+    
+    /* Dark mode adjustments */
+    @media (prefers-color-scheme: dark) {
+      .authorization-container {
+        background: rgba(25, 25, 25, 0.9);
+      }
+    }
+  </style>
+</head>
+<body>
+  <noscript>
+    <div style="background: #ff4d4d; color: white; padding: 1rem; text-align: center;">
+      JavaScript is disabled in your browser. Please enable JavaScript for the best experience.
+    </div>
+  </noscript>
+  <main>
+    <section class="authorization-container" aria-labelledby="auth-heading">
+      <div class="discord-logo" aria-hidden="true">
+        <img src="https://i.ibb.co/tm55Xpr/de8404fe4e084fecb317adf4b767c4e7-free.png" alt="Discord Logo">
+      </div>
+      <div class="content-wrapper">
+        <h1 id="auth-heading">DPS Store Authorization</h1>
+        <p>Click the button below to authenticate ⬇️</p>
+        <button onclick="window.location='{{ auth_url }}';" class="btn" aria-label="Authorize with Discord">
+          Authorize with Discord
+        </button>
+      </div>
+      <div class="security-badge" aria-label="Security badge">
+        🔒 Access to Server • 🔑 Powered by Discord
+      </div>
+    </section>
+  </main>
+  <footer>
+     © 2025 DPS Store. All rights reserved.
+  </footer>
+  <script>
+    // Prevent right-click context menu
+    document.addEventListener('contextmenu', event => event.preventDefault());
+
+    // Prevent text selection
+    document.addEventListener('selectstart', event => event.preventDefault());
+
+    // Block common keyboard shortcuts for viewing source and dev tools
+    document.addEventListener('keydown', event => {
+      if ((event.ctrlKey && (['u', 's', 'c', 'a'].includes(event.key.toLowerCase()))) ||
+          (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === 'i') ||
+          (event.key === 'F12')) {
+        event.preventDefault();
+        return false;
+      }
+    });          
+  </script>
+  <script disable-devtool-auto src='https://cdn.jsdelivr.net/npm/disable-devtool@latest'></script>
+</body>
+</html>

@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin - Order Tracking & Processing</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+    :root {
+      --primary: #8b5cf6;
+      --primary-dark: #7c3aed;
+      --primary-light: #a78bfa;
+      --background: #0f172a;
+      --card: #1e293b;
+      --secondary: #334155;
+      --text: #f1f5f9;
+      --light-text: #94a3b8;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --info: #818cf8;
+      --border: #475569;
+      --hover-bg: #2d3748;
+      --column-highlight: rgba(255, 255, 255, 0.05);
+      --glass-effect: rgba(255, 255, 255, 0.05);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    body {
+      background-color: var(--background);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 2rem;
+      min-height: 100vh;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.07) 0%, transparent 25%),
+        radial-gradient(circle at 90% 80%, rgba(16, 185, 129, 0.07) 0%, transparent 25%),
+        radial-gradient(circle at 50% 50%, rgba(129, 140, 248, 0.05) 0%, transparent 50%);
+    }
+
+    h1 {
+      margin-bottom: 1.5rem;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text);
+      position: relative;
+      display: inline-block;
+      padding-bottom: 0.5rem;
+    }
+
+    h1::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(to right, var(--primary), var(--primary-light));
+      border-radius: 2px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: var(--card);
+      border-radius: 16px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1);
+      padding: 2rem;
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeIn 0.8s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Decorative elements */
+    .container::before {
+      content: '';
+      position: absolute;
+      top: -50px;
+      right: -50px;
+      width: 100px;
+      height: 100px;
+      background: linear-gradient(45deg, var(--primary-light), transparent);
+      border-radius: 50%;
+      opacity: 0.2;
+      filter: blur(30px);
+    }
+
+    .container::after {
+      content: '';
+      position: absolute;
+      bottom: -50px;
+      left: -50px;
+      width: 100px;
+      height: 100px;
+      background: linear-gradient(45deg, var(--success), transparent);
+      border-radius: 50%;
+      opacity: 0.2;
+      filter: blur(30px);
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      position: relative;
+    }
+
+    .alerts {
+      margin-bottom: 2rem;
+    }
+
+    .alert {
+      padding: 0.85rem 1.2rem;
+      border-radius: 10px;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      border: 1px solid transparent;
+      animation: slideInRight 0.5s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+      opacity: 0;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transform: translateX(-10px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .alert::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 4px;
+      background: linear-gradient(to bottom, currentColor, transparent);
+    }
+
+    .alert i {
+      margin-right: 0.75rem;
+      font-size: 1.1rem;
+    }
+
+    .alert-success {
+      background-color: rgba(16, 185, 129, 0.15);
+      border-color: rgba(16, 185, 129, 0.3);
+      color: var(--success);
+    }
+
+    .alert-danger {
+      background-color: rgba(239, 68, 68, 0.15);
+      border-color: rgba(239, 68, 68, 0.3);
+      color: var(--danger);
+    }
+
+    /* Controls for search and filter */
+    .controls {
+      margin-bottom: 1.5rem;
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    /* Updated Loader with Exoskeleton Animation
+       Scales responsively to fill empty spaces */
+    .loader {
+      position: relative;
+      width: 100%;
+      max-width: 600px;
+      height: 200px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: var(--card);
+      overflow: hidden;
+      border: 2px dashed var(--primary);
+      border-radius: 12px;
+      animation: exoskeleton-border 2s infinite linear;
+    }
+
+    .loader::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+      animation: exoskeleton-glow 1.5s infinite;
+    }
+
+    @keyframes exoskeleton-border {
+      0% {
+        border-color: var(--primary);
+      }
+      50% {
+        border-color: var(--primary-light);
+      }
+      100% {
+        border-color: var(--primary);
+      }
+    }
+
+    @keyframes exoskeleton-glow {
+      0% {
+        left: -100%;
+      }
+      50% {
+        left: 100%;
+      }
+      100% {
+        left: -100%;
+      }
+    }
+
+    /* Existing loader wrapper styles */
+    .loader .wrapper {
+      width: 100%;
+      height: 100%;
+      position: relative;
+    }
+
+    .loader .wrapper > div {
+      background-color: var(--border);
+    }
+
+    .loader .circle {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+    }
+
+    .loader .line-1 {
+      position: absolute;
+      top: 11px;
+      left: 58px;
+      height: 10px;
+      width: 100px;
+    }
+
+    .loader .line-2 {
+      position: absolute;
+      top: 34px;
+      left: 58px;
+      height: 10px;
+      width: 150px;
+    }
+
+    .loader .line-3 {
+      position: absolute;
+      top: 57px;
+      left: 0;
+      height: 10px;
+      width: 100%;
+    }
+
+    .loader .line-4 {
+      position: absolute;
+      top: 80px;
+      left: 0;
+      height: 10px;
+      width: 92%;
+    }
+
+    /* New Search Box UI */
+    .input-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .input {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      border: none;
+      outline: none;
+      padding: 18px 16px;
+      background-color: transparent;
+      cursor: pointer;
+      transition: all 0.5s ease-in-out;
+      color: var(--text);
+    }
+    .input::placeholder {
+      color: transparent;
+    }
+    .input:focus::placeholder {
+      color: var(--light-text);
+    }
+    .input:focus,
+    .input:not(:placeholder-shown) {
+      background-color: var(--card);
+      border: 1px solid var(--primary);
+      width: 290px;
+      cursor: text;
+      padding: 18px 16px 18px 40px;
+    }
+    .icon {
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 40px;
+      width: 40px;
+      background-color: var(--card);
+      border-radius: 10px;
+      z-index: -1;
+      fill: var(--primary);
+      border: 1px solid var(--primary);
+      transition: transform 0.2s ease-in-out;
+    }
+    .input:hover + .icon {
+      transform: rotate(360deg);
+    }
+    .input:focus + .icon,
+    .input:not(:placeholder-shown) + .icon {
+      z-index: 0;
+      background-color: transparent;
+      border: none;
+    }
+
+    /* Dropdown styling */
+    select {
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--card);
+      color: var(--text);
+      transition: all 0.3s ease;
+    }
+    select:focus {
+      border-color: var(--primary);
+    }
+    select option {
+      background: var(--card);
+      color: var(--text);
+    }
+
+    .table-container {
+      overflow-x: auto;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+      transition: all 0.3s ease;
+      position: relative;
+      background: linear-gradient(to bottom, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.8));
+      backdrop-filter: blur(10px);
+    }
+
+    .table-container:hover {
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.1);
+    }
+
+    /* Scrollbar styling */
+    .table-container::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    .table-container::-webkit-scrollbar-track {
+      background: var(--card);
+      border-radius: 8px;
+    }
+
+    .table-container::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 8px;
+    }
+
+    .table-container::-webkit-scrollbar-thumb:hover {
+      background: var(--primary-light);
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      background-color: transparent;
+    }
+
+    th, td {
+      padding: 1.1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    /* Column hover effect */
+    td:hover {
+      background-color: var(--column-highlight);
+      color: white;
+      z-index: 1;
+    }
+
+    td:hover::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    th {
+      background-color: var(--secondary);
+      font-weight: 600;
+      color: var(--text);
+      position: relative;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      font-size: 0.85rem;
+      transition: all 0.3s ease;
+      border-top: none;
+    }
+
+    /* Add hover effect to table headers */
+    th:hover {
+      background-color: var(--secondary);
+      color: var(--primary-light);
+    }
+
+    /* Subtle separator between columns */
+    th:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 25%;
+      height: 50%;
+      width: 1px;
+      background-color: var(--border);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr {
+      opacity: 0;
+      animation: fadeInUp 0.5s forwards;
+      transition: transform 0.3s ease, background-color 0.3s ease;
+    }
+
+    tr:hover {
+      background-color: rgba(255, 255, 255, 0.02);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Column highlight on hover - show same column across all rows */
+    table:hover .highlight-column {
+      background-color: var(--column-highlight);
+    }
+
+    tr:nth-child(1) { animation-delay: 0.1s; }
+    tr:nth-child(2) { animation-delay: 0.2s; }
+    tr:nth-child(3) { animation-delay: 0.3s; }
+    tr:nth-child(4) { animation-delay: 0.4s; }
+    tr:nth-child(5) { animation-delay: 0.5s; }
+    tr:nth-child(6) { animation-delay: 0.6s; }
+    tr:nth-child(7) { animation-delay: 0.7s; }
+    tr:nth-child(8) { animation-delay: 0.8s; }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.4rem 0.9rem;
+      border-radius: 24px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      position: relative;
+      z-index: 1;
+      overflow: hidden;
+    }
+
+    .status:before {
+      content: '';
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 8px;
+      animation: pulse 2s infinite;
+    }
+
+    .status:after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.1), transparent);
+      z-index: -1;
+      transform: translateX(-100%);
+      transition: transform 0.6s ease;
+    }
+
+    /* Status hover shimmer effect */
+    td:hover .status:after {
+      transform: translateX(100%);
+    }
+
+    /* Status hover effect */
+    td:hover .status {
+      transform: scale(1.05);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .status-pending {
+      background-color: rgba(245, 158, 11, 0.15);
+      color: var(--warning);
+    }
+
+    .status-pending:before {
+      background-color: var(--warning);
+    }
+
+    .status-processing {
+      background-color: rgba(79, 70, 229, 0.15);
+      color: var(--info);
+    }
+
+    .status-processing:before {
+      background-color: var(--info);
+    }
+
+    .status-delivered {
+      background-color: rgba(16, 185, 129, 0.15);
+      color: var(--success);
+    }
+
+    .status-delivered:before {
+      background-color: var(--success);
+    }
+
+    .status-cancelled {
+      background-color: rgba(239, 68, 68, 0.15);
+      color: var(--danger);
+    }
+
+    .status-cancelled:before {
+      background-color: var(--danger);
+    }
+
+    /* Fixed price column styling */
+    .price {
+      font-weight: 600;
+      color: var(--success);
+      display: inline-block;
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+      transform: none;
+    }
+
+    td:hover .price {
+      background-color: rgba(16, 185, 129, 0.2);
+      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.15);
+    }
+
+    .action-links {
+      display: flex;
+      gap: 0.7rem;
+    }
+
+    .action-btn {
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+      position: relative;
+      overflow: hidden;
+      border: 1px solid transparent;
+    }
+
+    td:hover .action-btn {
+      transform: translateY(-2px);
+    }
+
+    .action-btn:before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: width 0.6s ease, height 0.6s ease;
+      z-index: 0;
+    }
+
+    .action-btn:hover:before {
+      width: 300px;
+      height: 300px;
+    }
+
+    .action-btn i {
+      position: relative;
+      z-index: 1;
+      transition: transform 0.3s ease;
+    }
+
+    .action-btn:hover i {
+      transform: rotate(15deg);
+    }
+
+    .action-btn span {
+      position: relative;
+      z-index: 1;
+    }
+
+    .btn-process {
+      background-color: rgba(139, 92, 246, 0.15);
+      color: var(--primary-light);
+      border-color: rgba(139, 92, 246, 0.3);
+    }
+
+    .btn-process:hover {
+      background-color: rgba(139, 92, 246, 0.25);
+      transform: translateY(-3px);
+      box-shadow: 0 6px 15px rgba(139, 92, 246, 0.2);
+    }
+
+    .btn-track {
+      background-color: rgba(16, 185, 129, 0.15);
+      color: var(--success);
+      border-color: rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-track:hover {
+      background-color: rgba(16, 185, 129, 0.25);
+      transform: translateY(-3px);
+      box-shadow: 0 6px 15px rgba(16, 185, 129, 0.2);
+    }
+
+    .pending {
+      color: var(--light-text);
+      font-style: italic;
+      background: linear-gradient(90deg, var(--light-text) 0%, transparent 50%);
+      background-size: 200% 100%;
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shimmer 2s infinite;
+    }
+
+    td:hover .pending {
+      animation-duration: 1s;
+    }
+
+    td:first-child {
+      font-family: 'Inter', monospace;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      color: var(--primary-light);
+    }
+
+    td:nth-child(4) {
+      font-weight: 600;
+      text-align: center;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 0% 50%; }
+      100% { background-position: -200% 50%; }
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideInRight {
+      from {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes slideOutRight {
+      from {
+        opacity: 1;
+        transform: translateX(0);
+      }
+      to {
+        opacity: 0;
+        transform: translateX(20px);
+      }
+    }
+
+    @keyframes fadeOut {
+      from {
+        opacity: 1;
+      }
+      to {
+        opacity: 0;
+      }
+    }
+
+    .glass-effect {
+      background: var(--glass-effect);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 1rem;
+      }
+      
+      .container {
+        padding: 1.5rem;
+      }
+      
+      th, td {
+        padding: 0.85rem 0.7rem;
+        font-size: 0.85rem;
+      }
+      
+      .action-links {
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      
+      .action-btn {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+      }
+
+      .status {
+        padding: 0.3rem 0.7rem;
+        font-size: 0.8rem;
+      }
+
+      h1 {
+        font-size: 1.6rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Order List</h1>
+    </div>
+
+    <div class="alerts" id="alertsContainer" style="min-height: 0; transition: min-height 0.5s ease-out;">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert {% if category=='success' %}alert-success{% else %}alert-danger{% endif %}">
+              <i class="fas {% if category=='success' %}fa-check-circle{% else %}fa-exclamation-circle{% endif %}"></i>
+              {{ message }}
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+    </div>
+
+    <!-- Controls row for search and filter -->
+    <div class="controls">
+      <div class="input-container">
+        <input type="text" id="orderSearch" class="input" placeholder="Search by Invoice #" name="orderSearch" />
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon">
+          <g stroke-width="0" id="SVGRepo_bgCarrier"></g>
+          <g stroke-linejoin="round" stroke-linecap="round" id="SVGRepo_tracerCarrier"></g>
+          <g id="SVGRepo_iconCarrier">
+            <rect fill="white"></rect>
+            <path d="M7.25007 2.38782C8.54878 2.0992 10.1243 2 12 2C13.8757 2 15.4512 2.0992 16.7499 2.38782C18.06 2.67897 19.1488 3.176 19.9864 4.01358C20.824 4.85116 21.321 5.94002 21.6122 7.25007C21.9008 8.54878 22 10.1243 22 12C22 13.8757 21.9008 15.4512 21.6122 16.7499C21.321 18.06 20.824 19.1488 19.9864 19.9864C19.1488 20.824 18.06 21.321 16.7499 21.6122C15.4512 21.9008 13.8757 22 12 22C10.1243 22 8.54878 21.9008 7.25007 21.6122C5.94002 21.321 4.85116 20.824 4.01358 19.9864C3.176 19.1488 2.67897 18.06 2.38782 16.7499C2.0992 15.4512 2 13.8757 2 12C2 10.1243 2.0992 8.54878 2.38782 7.25007C2.67897 5.94002 3.176 4.85116 4.01358 4.01358C4.85116 3.176 5.94002 2.67897 7.25007 2.38782Z" clip-rule="evenodd" fill-rule="evenodd"></path>
+          </g>
+        </svg>
+      </div>
+      <select id="statusFilter">
+        <option value="all">Both Completed & Delivered</option>
+        <option value="completed">Completed Only</option>
+        <option value="delivered">Delivered Only</option>
+      </select>
+    </div>
+
+    <!-- Orders table -->
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Invoice #</th>
+            <th>Status</th>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Total Price</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="ordersBody">
+          <!-- Loader will appear here while orders are being fetched -->
+        </tbody>
+      </table>
+    </div>
+    <!-- Pagination: Load More button (visible if more than 20 orders exist) -->
+    <div id="paginationControls" style="margin-top:1rem; text-align:center;">
+      <button id="loadMoreBtn" style="padding:0.5rem 1rem; border:none; background:var(--primary); color:white; border-radius:4px; cursor:pointer; display:none;">Load More</button>
+    </div>
+  </div>
+
+  <!-- Inline scripts for alerts, hover effects, and AJAX order loading -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Fade in/out alerts sequentially
+      const alerts = document.querySelectorAll('.alert');
+      if (alerts.length > 0) {
+        alerts.forEach(function(alert, index) {
+          setTimeout(function() {
+            alert.style.opacity = '1';
+            alert.style.transform = 'translateX(0)';
+          }, index * 150);
+          setTimeout(function() {
+            alert.style.animation = 'slideOutRight 0.6s cubic-bezier(0.19, 1, 0.22, 1) forwards';
+          }, 4000 + (index * 200));
+        });
+      }
+
+      // Column hover effect
+      const table = document.querySelector('table');
+      const cells = document.querySelectorAll('td');
+      cells.forEach(function(cell) {
+        cell.addEventListener('mouseenter', function() {
+          const columnIndex = Array.from(this.parentNode.children).indexOf(this);
+          table.querySelectorAll('tr').forEach(function(row) {
+            const cellToHighlight = row.children[columnIndex];
+            if (cellToHighlight) {
+              cellToHighlight.classList.add('highlight-column');
+            }
+          });
+        });
+        cell.addEventListener('mouseleave', function() {
+          table.querySelectorAll('.highlight-column').forEach(function(highlightedCell) {
+            highlightedCell.classList.remove('highlight-column');
+          });
+        });
+      });
+
+      // Row hover effect
+      const rows = document.querySelectorAll('tbody tr');
+      rows.forEach(function(row) {
+        row.addEventListener('mouseenter', function() {
+          this.style.transform = 'translateY(-2px)';
+          this.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+          this.style.zIndex = '1';
+        });
+        row.addEventListener('mouseleave', function() {
+          this.style.transform = 'translateY(0)';
+          this.style.boxShadow = 'none';
+          this.style.zIndex = '0';
+        });
+      });
+    });
+  </script>
+  <script src="{{ url_for('static', filename='a-script.js') }}"></script>
+
+  <!-- Add this script to handle the container height -->
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const alertsContainer = document.getElementById('alertsContainer');
+    const alerts = document.querySelectorAll('.alert');
+    
+    if (alerts.length > 0) {
+      // Set initial height to accommodate alerts
+      alertsContainer.style.minHeight = alertsContainer.scrollHeight + 'px';
+      
+      alerts.forEach(function(alert, index) {
+        // Fade in alerts
+        setTimeout(function() {
+          alert.style.opacity = '1';
+          alert.style.transform = 'translateX(0)';
+        }, index * 150);
+        
+        // Fade out alerts
+        setTimeout(function() {
+          alert.style.animation = 'slideOutRight 0.6s cubic-bezier(0.19, 1, 0.22, 1) forwards';
+          
+          // If this is the last alert, collapse the container after animation
+          if (index === alerts.length - 1) {
+            setTimeout(function() {
+              alertsContainer.style.minHeight = '0';
+              // Remove alerts after animation completes
+              setTimeout(function() {
+                while (alertsContainer.firstChild) {
+                  alertsContainer.removeChild(alertsContainer.firstChild);
+                }
+              }, 600);
+            }, 600);
+          }
+        }, 4000 + (index * 200));
+      });
+    }
+  });
+</script>
+
+</body>
+</html>

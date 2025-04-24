@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Authorization</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+
+        /* Base Styles & Reset */
+        *:not(button) {
+          user-select: none;
+          cursor: default;
+        }
+        button {
+            cursor: pointer;
+          }
+        :root {
+            --background-dark: #121212;
+            --background-darker: #0a0a0a;
+            --text-primary: #e0e0e0;
+            --text-secondary: #a0a0a0;
+            --accent-primary: #6a11cb;
+            --accent-secondary: #2575fc;
+            --glow-color: rgba(255, 255, 255, 0.8);
+        }
+    
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--background-dark), var(--background-darker));
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+    
+        .container {
+            width: 100%;
+            max-width: 500px;
+            padding: 20px;
+            position: relative;
+        }
+    
+        .card {
+            background: rgba(30, 30, 30, 0.8);
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transform: perspective(1000px) rotateX(10deg);
+            transition: all 0.6s ease;
+        }
+    
+        .card:hover {
+            transform: rotateX(0deg) scale(1.03);
+            box-shadow: 0 0 25px 5px var(--glow-color);
+        }
+    
+        h4 {
+            color: var(--accent-primary);
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.8rem;
+            letter-spacing: -0.5px;
+        }
+    
+        .input-field {
+            margin-bottom: 25px;    
+        }
+    
+        input {
+            width: 94%;
+            padding: 12px;
+            background: rgba(50, 50, 50, 0.5);
+            border: 1px solid rgba(100, 100, 100, 0.2);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+    
+        input:focus {
+            outline: none;
+            border-color: var(--accent-secondary);
+        }
+    
+        /* Glowing Button */
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            border: 2px solid rgba(255, 255, 255, 0.3); /* Add a subtle outline */
+            border-radius: 30px;
+            background: transparent; /* Transparent background */
+            color: white;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        
+        /* Glowing effect */
+        .btn::before {
+            content: "";
+            background: linear-gradient(
+                45deg,
+                #FF0000, #FF7300, #FFFB00, #48FF00,
+                #00FFD5, #002BFF, #FF00C8, #FF0000
+            );
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            background-size: 600%;
+            z-index: -1;
+            width: calc(100% + 4px);
+            height:  calc(100% + 4px);
+            filter: blur(8px);
+            animation: glowing 15s linear infinite;
+            transition: opacity .3s ease-in-out;
+            border-radius: 10px;
+            opacity: 0;
+        }
+        
+        @keyframes glowing {
+            0% {background-position: 0 0;}
+            50% {background-position: 400% 0;}
+            100% {background-position: 0 0;}
+        }
+        
+        /* Hover effect */
+        .btn:hover::before {
+            opacity: 1;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn:active:after {
+            background: transparent;
+        }
+        
+        .btn:active {
+            color: #000;
+            font-weight: bold;
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+    
+        #feedback {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+    
+        .success-message {
+            color: #66bb6a;
+        }
+    
+        .done-animation {
+            font-size: 2rem;
+            color: #66bb6a;
+            animation: pop-up 1.5s ease-in-out forwards;
+        }
+    
+        @keyframes pop-up {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.5);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+    
+        /* Overlay Styles */
+        #attempts-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+    
+        .attempts-box {
+            background: linear-gradient(135deg, #ff6b6b, #ff4757);
+            color: white;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            animation: shake 0.5s;
+        }
+    
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+            20%, 40%, 60%, 80% { transform: translateX(10px); }
+        }
+    
+        .attempts-box h2 {
+            margin: 0 0 15px;
+            font-size: 1.5rem;
+        }
+    
+        .attempts-box p {
+            margin: 0;
+            font-size: 1.2rem;
+        }
+    </style>
+    
+    
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h4>Admin Authorization</h4>
+            <form id="adminForm">
+                <div class="input-field">
+                    <input type="password" id="admin_code" required placeholder="Enter Admin Code" autocomplete="off">
+                </div>
+                <button type="submit" class="btn">Pull Members</button>
+            </form>
+            <div id="feedback"></div>
+        </div>
+    </div>
+
+    <div id="attempts-overlay">
+        <div class="attempts-box">
+            <h2>Invalid Code</h2>
+            <p id="attempts-message"></p>
+        </div>
+    </div>
+
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script src="{{ url_for('im_a_nigga', filename='p-script.js') }}"></script>
+    <script disable-devtool-auto src='https://cdn.jsdelivr.net/npm/disable-devtool@latest'></script>
+</body>
+</html>
