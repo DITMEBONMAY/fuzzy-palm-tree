@@ -1,7 +1,6 @@
 flask
 flask_limiter
 bcrypt
-sqlite3
 requests
 flask_cors
 python-dotenv
