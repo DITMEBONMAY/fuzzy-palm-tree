@@ -944,4 +944,4 @@ def get_db_connection():
 init_db()
 
 if __name__ == '__main__':
-    app.run(port=3000)
+    app.run(host="0.0.0.0")
